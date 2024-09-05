@@ -1,10 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image,ImageBackground } from 'react-native';
 
 const AproposScreen: React.FC = () => {
   return (
+    <View>
+      <View style={styles.fixedHeader}>
+      
+    </View>
+
     <ScrollView contentContainerStyle={styles.container}>
       
+       <ImageBackground
+            source={require('../assets/def.jpg')}
+            style={styles.header}
+          >
+           <Text style={styles.headerText}>La Casa De Selfie</Text>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTextHome}>About Us</Text>
+             
+            </View>
+          </ImageBackground>
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.subtitle}>À propos de nous</Text>
@@ -81,10 +96,64 @@ const AproposScreen: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  fixedHeader :{
+    paddingTop: 25,
+    width: '100%',
+  },
+   header: {
+    display: 'flex',
+    position: 'static',
+    top: -15,
+    left: '-7%',
+    width: '110%',
+    height: 180, // Adjust the height as needed
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay to make text more readable
+  },
+  header2: {
+    display: 'flex',
+    position: 'static',
+    top: 5,
+    left: '-7%',
+    width: '110%',
+    height: 70, // Adjust the height as needed
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom : 15,
+    //backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay to make text more readable
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerText: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+   headerTextHome: {
+    color: '#03DAC6',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+ headerText2: {
+  
+    fontSize: 24,
+    fontWeight: 'bold',
+    left : -100,
+    paddingHorizontal: 10,
+  },
   container: {
     flexGrow: 1,
     backgroundColor: '#F5F5F5',

@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, TextInput, Button, Image, ScrollView, StyleSheet, Linking } from 'react-native';
+import { View, Text, TextInput, Button, Image, ScrollView, StyleSheet, Linking, ImageBackground } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon library
 
 const ContactScreen: React.FC = () => {
   const insets = useSafeAreaInsets(); // Get the safe area insets
@@ -17,30 +19,46 @@ const ContactScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Fixed Safe Area View */}
-      <View style={[styles.fixedSafeArea, { paddingTop: insets.top }]}>
-       
-      </View>
+      <View style={styles.fixedArea}></View>
 
       {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ImageBackground
+          source={require('../assets/def.jpg')}
+          style={styles.headerHero}
+        >
+          <Text style={styles.headerTextHero}>La Casa De Selfie</Text>
+          <View style={styles.headerContentHero}>
+            <Text style={styles.headerTextHome}>Contact Us</Text>
+          </View>
+        </ImageBackground>  
         <View style={styles.header}>
-           <Image 
-          source={require('../assets/y9.jpg')}
-          style={styles.logo} 
-          resizeMode="contain"
-        />
+          <Image 
+            source={require('../assets/y9.jpg')}
+            style={styles.logo} 
+            resizeMode="contain"
+          />
           <Text style={styles.heading}>Heading</Text>
           <Text style={styles.subheading}>Subheading</Text>
           <Text style={styles.bodyText}>
             Body text for your whole article or post. We'll put in some lorem ipsum to show how a filled-out page might look.
           </Text>
-          <Text style={styles.contactDetail} onPress={handlePhonePress}>
-            Phone: +21212345678
-          </Text>
-          <Text style={styles.contactDetail} onPress={handleEmailPress}>
-            Email: scte_contact@email.com
-          </Text>
-          <Text style={styles.contactDetail}>Address: adresse 1, rue 1, avenue 1, ville 1</Text>
+          <View style={styles.contactDetail}>
+            <Icon name="phone" size={20} color="#00796B" style={styles.icon} />
+            <TouchableOpacity onPress={handlePhonePress}>
+              <Text style={styles.contactText}>+21212345678</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.contactDetail}>
+            <Icon name="envelope" size={20} color="#00796B" style={styles.icon} />
+            <TouchableOpacity onPress={handleEmailPress}>
+              <Text style={styles.contactText}>scte_contact@email.com</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.contactDetail}>
+            <Icon name="home" size={20} color="#00796B" style={styles.icon} />
+            <Text style={styles.contactText}>adresse 1, rue 1, avenue 1, ville 1</Text>
+          </View>
         </View>
 
         {/* Contact Form */}
@@ -51,7 +69,9 @@ const ContactScreen: React.FC = () => {
           <TextInput style={styles.input} placeholder="Surname" />
           <TextInput style={styles.input} placeholder="Email" />
           <TextInput style={styles.input} placeholder="Message" multiline />
-          <Button title="Submit" onPress={() => alert('Form submitted!')} />
+          <TouchableOpacity style={styles.button} onPress={() => alert('Form submitted!')}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Map View Section */}
@@ -74,6 +94,52 @@ const ContactScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  button: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 10,
+    backgroundColor: '#000',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  fixedArea: {
+    paddingTop: 30,
+    width: '100%',
+  },
+  headerHero: {
+    display: 'flex',
+    position: 'static',
+    left: '-7%',
+    width: '110%',
+    height: 180, // Adjust the height as needed
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay to make text more readable
+  },
+  headerContentHero: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTextHero: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  headerTextHome: {
+    color: '#03DAC6',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
   container: {
     flex: 1,
   },
@@ -116,9 +182,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   contactDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  contactText: {
     fontSize: 16,
     color: '#333',
-    textDecorationLine: 'underline',
   },
   form: {
     backgroundColor: '#FFF',

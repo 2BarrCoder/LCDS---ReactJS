@@ -47,7 +47,7 @@ const BlogScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Blog</Text>
+      
       <FlatList
         data={articles}
         renderItem={renderArticle}
@@ -63,13 +63,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#333',
-  },
+ 
   listContainer: {
     paddingBottom: 20,
   },

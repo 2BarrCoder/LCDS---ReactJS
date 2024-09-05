@@ -3,26 +3,31 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabNavigator';
+import BlogScreen from './screens/BlogScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import ServicesDePhotographie from './Services/ServicesDePhotographie';
-import StudioDePriseDePhotos from './Services/StudioDePriseDePhotos';
-import GaleriesDePhotos from './Services/GaleriesDePhotos';
-import PrendreUnRendezVous from './Services/PrendreUnRendezVous';
-import VisiteVirtuelleDuStudio from './Services/VisiteVirtuelleDuStudio';
-import PriseDePhotosADistance from './Services/PriseDePhotosADistance';
+import PhotographyServicesScreen from './Services/ServicesDePhotographie';
+import PhotoStudioScreen from './Services/StudioDePriseDePhotos';
+import PhotoGalleryScreen from './Services/GaleriesDePhotos';
+import BookAppointmentScreen from './Services/PrendreUnRendezVous';
+import VirtualStudioTourScreen from './Services/VisiteVirtuelleDuStudio';
+import RemotePhotographyScreen from './Services/PriseDePhotosADistance';
+import GamificationScreen from './screens/GamificationScreen';
+
+import './styles/tailwind.css';
 
 export type RootStackParamList = {
-  Accueil:undefined;
   BottomTab: undefined;
-  LoginScreen: undefined;
-  RegisterScreen: undefined;
-  ServicesDePhotographie: undefined;
-  StudioDePriseDePhotos: undefined;
-  GaleriesDePhotos: undefined;
-  PrendreUnRendezVous: undefined;
-  VisiteVirtuelleDuStudio: undefined;
-  PriseDePhotosADistance: undefined;
+  Login: undefined;
+  Register: undefined;
+  Blog: undefined;
+  PhotographyServices: undefined;
+  PhotoStudio: undefined;
+  PhotoGallery: undefined;
+  BookAppointment: undefined;
+  VirtualStudioTour: undefined;
+  RemotePhotography: undefined;
+  Gamification: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -36,15 +41,56 @@ const App: React.FC = () => {
           component={BottomTabNavigator}
           options={{ headerShown: false }}
         />
-        
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-        <Stack.Screen name="ServicesDePhotographie" component={ServicesDePhotographie} />
-        <Stack.Screen name="StudioDePriseDePhotos" component={StudioDePriseDePhotos} />
-        <Stack.Screen name="GaleriesDePhotos" component={GaleriesDePhotos} />
-        <Stack.Screen name="PrendreUnRendezVous" component={PrendreUnRendezVous} />
-        <Stack.Screen name="VisiteVirtuelleDuStudio" component={VisiteVirtuelleDuStudio} />
-        <Stack.Screen name="PriseDePhotosADistance" component={PriseDePhotosADistance} />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ title: 'Login' }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ title: 'Register' }}
+        />
+        <Stack.Screen
+          name="Blog"
+          component={BlogScreen}
+          options={{ title: 'Blog' }}
+        />
+        <Stack.Screen
+          name="PhotographyServices"
+          component={PhotographyServicesScreen}
+          options={{ title: 'Photography Services' }}
+        />
+        <Stack.Screen
+          name="PhotoStudio"
+          component={PhotoStudioScreen}
+          options={{ title: 'Photo Studio' }}
+        />
+        <Stack.Screen
+          name="PhotoGallery"
+          component={PhotoGalleryScreen}
+          options={{ title: 'Photo Gallery' }}
+        />
+        <Stack.Screen
+          name="PickAppointment"
+          component={BookAppointmentScreen}
+          options={{ title: 'Pick an Appointment' }}
+        />
+        <Stack.Screen
+          name="VirtualStudioTour"
+          component={VirtualStudioTourScreen}
+          options={{ title: 'Virtual Studio Tour' }}
+        />
+        <Stack.Screen
+          name="RemotePhotography"
+          component={RemotePhotographyScreen}
+          options={{ title: 'Remote Photography' }}
+        />
+        <Stack.Screen
+          name="Gamification"
+          component={GamificationScreen}
+          options={{ title: 'Gamification' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,47 +1,70 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import {register} from './session_utils';
 
 const RegisterScreen: React.FC = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleRegister = () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
-      return;
+  const navigation = useNavigation();
+
+   const handleRegister = async () => {
+    const data = await register(name, email, password);
+
+    if (data.success) {
+      Alert.alert('Success', data.message);
+      setName('');setEmail('');setPassword('');setConfirmPassword('');
+      navigation.navigate('LoginScreen'); // Navigate to the login screen
+    } else {
+      Alert.alert('Error', data.message);
+      setName('');setEmail('');setPassword('');setConfirmPassword('');
     }
-    // Implémenter la logique d'inscription ici
-    Alert.alert("Succès", "Inscription réussie !");
+  }
+  
+  ;
+
+  const navigateToLogin = () => {
+    navigation.navigate('LoginScreen');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Créer un compte</Text>
+      <Image source={require('../assets/y11.png')} style={styles.logo} />
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
+        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
-        placeholder="Mot de passe"
+        placeholder="Password"
+        secureTextEntry
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
       <TextInput
         style={styles.input}
-        placeholder="Confirmer le mot de passe"
+        placeholder="Confirm Password"
+        secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>S'inscrire</Text>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={navigateToLogin}>
+        <Text style={styles.loginLink}>You have an account? <Text style={styles.loginText}>Log in</Text></Text>
       </TouchableOpacity>
     </View>
   );
@@ -52,38 +75,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#333',
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
   },
   input: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
+    padding: 15,
+    marginVertical: 10,
     borderWidth: 1,
     borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
   },
   button: {
     width: '100%',
-    height: 50,
-    backgroundColor: '#0056b3',
+    padding: 15,
     borderRadius: 8,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginVertical: 10,
+    backgroundColor: '#000',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loginLink: {
+    color: '#666',
+    marginTop: 15,
+  },
+  loginText: {
+    color: '#007bff',
     fontWeight: 'bold',
   },
 });
