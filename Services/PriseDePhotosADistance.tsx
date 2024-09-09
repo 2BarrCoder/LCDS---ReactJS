@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity, TextInput, Button, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Image, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import ViewShot from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 
 const defaultImage = require('../assets/y9.jpg'); // Adjust the path as necessary
 
+const backgrounds = [
+  require('../assets/y7.jpeg'),
+  require('../assets/y13.jpg'),
+  require('../assets/nat1.jpg'),
+  require('../assets/nat2.webp'),
+];
+
 const PhotoUploadForm = () => {
   const [imageUri, setImageUri] = useState(null);
-  const [imageName, setImageName] = useState('No image selected');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [address1, setAddress1] = useState('');
-  const [address2, setAddress2] = useState('');
-  const [phone, setPhone] = useState('');
+  const [removedBgImageUri, setRemovedBgImageUri] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
+  const [capturedUri, setCapturedUri] = useState(null);
+  const viewShotRef = useRef(null);
 
   const pickImage = async () => {
-    // Request permission to access the media library
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
       return;
     }
 
-    // Launch the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -32,84 +39,148 @@ const PhotoUploadForm = () => {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImage = result.assets[0];
-      console.log('Image selected:', selectedImage.uri);
       setImageUri(selectedImage.uri);
-      setImageName('image selected' || 'No image selected');
+      autoRemoveBackground(selectedImage.uri);
     } else {
-      console.log('Image selection was canceled or no assets found');
       setImageUri(null);
-      setImageName('No image selected');
     }
   };
 
-  const handleSubmit = () => {
-    // Validate form fields
-    if (!firstName || !lastName || !email || !address1 || !address2 || !phone) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const takePicture = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
       return;
     }
-    // Handle form submission logic here, e.g., sending data to an API
-    Alert.alert('Form Submitted', 'Your data has been successfully submitted!');
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const capturedImage = result.assets[0];
+      setImageUri(capturedImage.uri);
+      autoRemoveBackground(capturedImage.uri);
+    } else {
+      setImageUri(null);
+    }
+  };
+
+  const autoRemoveBackground = async (uri) => {
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append('image_file', {
+        uri,
+        name: 'image.jpg',
+        type: 'image/jpeg',
+      });
+
+      const bgRemoveResponse = await fetch('https://api.remove.bg/v1.0/removebg', {
+        method: 'POST',
+        headers: {
+          'X-Api-Key': 'WMrDtTWUEsiAfAEKwGgfjSW5', // Replace with your remove.bg API key
+        },
+        body: formData,
+      });
+
+      if (!bgRemoveResponse.ok) {
+        throw new Error('Failed to remove the background.');
+      }
+
+      const blobResponse = await bgRemoveResponse.blob();
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setRemovedBgImageUri(reader.result);
+        setSelectedBackground(backgrounds[0]); // Automatically select the first background
+      };
+      reader.readAsDataURL(blobResponse);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to remove the background. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectBackground = (background) => {
+    setSelectedBackground(background);
+  };
+
+  const captureAndDownloadImage = async () => {
+    try {
+      if (viewShotRef.current) {
+        const uri = await captureRef(viewShotRef.current, {
+          format: 'png',
+          quality: 0.8,
+        });
+        setCapturedUri(uri);
+
+        // Check if sharing is available and then share the image
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(uri);
+        } else {
+          Alert.alert('Sharing not available', 'Sharing is not available on this device.');
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to capture and share the image.');
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <View style={styles.imageSection}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={imageUri ? { uri: imageUri } : defaultImage}
-              style={styles.image}
-            />
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.formContainer}>
+          <ViewShot ref={viewShotRef} style={styles.imageSection}>
+            <View style={styles.imageContainer}>
+              {selectedBackground && (
+                <Image source={selectedBackground} style={styles.backgroundImage} />
+              )}
+              <Image
+                source={removedBgImageUri ? { uri: removedBgImageUri } : defaultImage}
+                style={styles.image}
+              />
+            </View>
+          </ViewShot>
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.btn} onPress={pickImage}>
+              <Text style={styles.btnText}>Choose Photo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.btn} onPress={takePicture}>
+              <Text style={styles.btnText}>Take Picture</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.imageInfo}>
-            <Text style={styles.imageName}>{imageName}</Text>
-          </View>
+
+          {loading && <ActivityIndicator size="large" color="#03DAC6" />}
+
+          {removedBgImageUri && (
+            <>
+              <View style={styles.backgroundIconContainer}>
+                <FlatList
+                  data={backgrounds}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => selectBackground(item)}>
+                      <Image source={item} style={styles.backgroundIcon} />
+                    </TouchableOpacity>
+                  )}
+                  horizontal
+                />
+              </View>
+
+              <TouchableOpacity style={styles.btn} onPress={captureAndDownloadImage}>
+                <Text style={styles.btnText}>Capture and Download Image</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
-        <TouchableOpacity style={styles.btn} onPress={pickImage}>
-          <Text style={styles.btnText}>Choisir une photo</Text>
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="First Name"
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          value={lastName}
-          onChangeText={setLastName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Address 01"
-          value={address1}
-          onChangeText={setAddress1}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Address 02"
-          value={address2}
-          onChangeText={setAddress2}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Phone"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-        <Button title="Submit" onPress={handleSubmit} color="#03DAC6" />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -119,41 +190,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'aliceblue', // Background color for the entire screen
+    backgroundColor: 'aliceblue',
   },
   formContainer: {
-    backgroundColor: 'white', // Background color for the form container
+    backgroundColor: 'white',
     borderRadius: 10,
     padding: 16,
     width: '100%',
-    maxWidth: 400, // Optional: limits the width of the form container
+    maxWidth: 400,
     alignItems: 'center',
   },
   imageSection: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
   imageContainer: {
-    width: 150,
-    height: 150,
+    width: 300,
+    height: 300,
     borderColor: '#ddd',
-    borderWidth: 1,
+    //borderWidth: 1,
     borderRadius: 5,
-    overflow: 'hidden', // Ensure image does not overflow
-    marginRight: 20, // Space between image and text
+    overflow: 'hidden',
+    position: 'relative',
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+    position: 'absolute',
   },
-  imageInfo: {
-    flex: 1,
-  },
-  imageName: {
-    fontSize: 16,
-    color: '#333',
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    resizeMode: 'cover',
   },
   btn: {
     backgroundColor: '#03DAC6',
@@ -165,14 +235,22 @@ const styles = StyleSheet.create({
     color: 'aliceblue',
     fontSize: 16,
   },
-  input: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 5,
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  backgroundIconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center', // Center horizontally
+    marginTop: 20,
+  },
+  backgroundIcon: {
+    width: 50,
+    height: 50,
+    margin: 5,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
 });
 
