@@ -5,6 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import ViewShot from 'react-native-view-shot';
 import { captureRef } from 'react-native-view-shot';
+import * as MediaLibrary from 'expo-media-library';
 
 const defaultImage = require('../assets/y9.jpg'); // Adjust the path as necessary
 
@@ -82,7 +83,7 @@ const PhotoUploadForm = () => {
       const bgRemoveResponse = await fetch('https://api.remove.bg/v1.0/removebg', {
         method: 'POST',
         headers: {
-          'X-Api-Key': 'WMrDtTWUEsiAfAEKwGgfjSW5', // Replace with your remove.bg API key
+          'X-Api-Key': 'owd2VRvj3wXAz6BZwL1f92Vu', // Replace with your remove.bg API key
         },
         body: formData,
       });
@@ -111,23 +112,29 @@ const PhotoUploadForm = () => {
 
   const captureAndDownloadImage = async () => {
     try {
-      if (viewShotRef.current) {
-        const uri = await captureRef(viewShotRef.current, {
-          format: 'png',
-          quality: 0.8,
-        });
-        setCapturedUri(uri);
+    if (viewShotRef.current) {
+      const uri = await captureRef(viewShotRef.current, {
+        format: 'png',
+        quality: 0.8,
+      });
+      setCapturedUri(uri);
 
-        // Check if sharing is available and then share the image
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(uri);
-        } else {
-          Alert.alert('Sharing not available', 'Sharing is not available on this device.');
-        }
+      // Request permission to access media library
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Permission to access media library is required to save the image.');
+        return;
       }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to capture and share the image.');
+
+      // Save the image to the gallery
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync('LCDS', asset, false);
+
+      Alert.alert('Success', 'Image saved to gallery.');
     }
+  } catch (error) {
+    Alert.alert('Error', 'Failed to capture and save the image.');
+  }
   };
 
   return (
