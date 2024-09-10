@@ -339,3 +339,46 @@ export const updateLevel = async (level) => {
   }
 
 };
+
+export const Pay = async (amount) => {
+  try {
+    const response = await fetch(`${BASE_URL}/store_payment.php`, {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+
+    if (data.success) {
+      return { success: true, data };
+    } else {
+      return { success: false, message: data.error || 'Unknown error' };
+    }
+  } catch (error) {
+    console.error('Error getting friends :', error);
+    return { success: false, message: 'Network error or server issue.' };
+  }
+
+};
+
+// api.js
+
+export const fetchGalleries = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/getGalerie.php`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching galleries:', error);
+    throw error; // Re-throw error to handle it in the component
+  }
+};

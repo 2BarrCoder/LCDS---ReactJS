@@ -71,17 +71,18 @@ const ServicesScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Row 2 */}
         <View style={styles.row}>
+            
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate('RemotePhotography')}
+            onPress={() => navigation.navigate('VirtualStudioTour')}
           >
             <Image 
               source={require('../assets/y7.jpeg')}
               style={styles.icon}
             />
-            <Text style={styles.cardTitle}>Prise de Photos à Distance</Text>
+            <Text style={styles.cardTitle}>Visite Virtuelle du Studio</Text>
             <Text style={styles.cardDescription}>
-              Prenez des photos à distance comme si vous étiez présent grâce à notre technologie avancée.
+              Faites une visite virtuelle de notre studio pour voir nos installations avant votre visite.
             </Text>
           </TouchableOpacity>
 
@@ -102,19 +103,7 @@ const ServicesScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Row 3 */}
         <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate('VirtualStudioTour')}
-          >
-            <Image 
-              source={require('../assets/y7.jpeg')}
-              style={styles.icon}
-            />
-            <Text style={styles.cardTitle}>Visite Virtuelle du Studio</Text>
-            <Text style={styles.cardDescription}>
-              Faites une visite virtuelle de notre studio pour voir nos installations avant votre visite.
-            </Text>
-          </TouchableOpacity>
+          
 
           {/* Add another service here if needed */}
         </View>
@@ -127,7 +116,7 @@ const ServicesScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   header: {
     position: 'static',
-    top: -10,
+    top: -15,
     left: '-7%',
     width: '110%',
     height: 180,

@@ -1,13 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList, ScrollView } from 'react-native';
+import { View, Image, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList,Modal, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import ViewShot from 'react-native-view-shot';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
-
+import { WebView } from 'react-native-webview';
 const defaultImage = require('../assets/y9.jpg'); // Adjust the path as necessary
+import { Asset } from 'expo-asset';
+import {Pay,checkSession} from '../screens/session_utils';
+import { Ionicons } from '@expo/vector-icons';
+
 
 const backgrounds = [
   require('../assets/y7.jpeg'),
@@ -23,6 +27,8 @@ const PhotoUploadForm = () => {
   const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
   const [capturedUri, setCapturedUri] = useState(null);
   const viewShotRef = useRef(null);
+
+  
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -115,7 +121,7 @@ const PhotoUploadForm = () => {
     if (viewShotRef.current) {
       const uri = await captureRef(viewShotRef.current, {
         format: 'png',
-        quality: 0.8,
+        quality: 1,
       });
       setCapturedUri(uri);
 
@@ -129,17 +135,84 @@ const PhotoUploadForm = () => {
       // Save the image to the gallery
       const asset = await MediaLibrary.createAssetAsync(uri);
       await MediaLibrary.createAlbumAsync('LCDS', asset, false);
-
       Alert.alert('Success', 'Image saved to gallery.');
+      setStatus(false);
+
     }
   } catch (error) {
     Alert.alert('Error', 'Failed to capture and save the image.');
   }
   };
+   
+  const localHtml = Asset.fromModule(require('./payment/index.html')).uri;
+  const [Visible,setVisible] = useState(false);
+  const [name,setName] = useState('');
+  const [email,setEmail] = useState('');
+  const [amount,setAmount] = useState('');
+  const [Status,setStatus] = useState(false);
+  
+ 
+  const onMessage = (event) => {
+    const data = JSON.parse(event.nativeEvent.data);
+  
+      // infos du compte de payment 
+      setName(data.payerName);
+      setEmail(data.payerEmail);
+      setAmount(data.amount);
+      setStatus(data.pay_status);
 
+
+      const savePay = async(amount) =>{
+        const data = await Pay(amount);
+        if (data.success)
+        {
+          console.log('saved');
+        }
+        else
+        console.log('fail');
+      }
+
+      savePay(amount);
+
+      setVisible(false);
+  };
   return (
     <ScrollView>
+
+    <Modal
+    
+    visible={Visible}
+    >
+      <TouchableOpacity
+      onPress={()=>setVisible(false)}
+      style={{
+        top:0,
+        left:'85%',
+        backgroundColor:'#000',
+        borderRadius:60,
+        width:40}}
+      >
+        <Text style={{
+          left:'36%',
+          fontSize:18,
+          fontWeight:'bold',
+          color:'white',
+          marginBottom:4,
+          }}>
+          x
+        </Text>
+    </TouchableOpacity>
+        <WebView source={{ uri: localHtml }} 
+        style={{ width: '100%', height: 500 }} 
+        onMessage={onMessage}  
+      
+      />
+    </Modal>
+      
+     
+
       <View style={styles.container}>
+        
         <View style={styles.formContainer}>
           <ViewShot ref={viewShotRef} style={styles.imageSection}>
             <View style={styles.imageContainer}>
@@ -154,16 +227,18 @@ const PhotoUploadForm = () => {
           </ViewShot>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.btn} onPress={pickImage}>
-              <Text style={styles.btnText}>Choose Photo</Text>
-            </TouchableOpacity>
+      <TouchableOpacity style={styles.btn} onPress={pickImage}>
+        <Ionicons name="image" size={24} color="white" style={styles.icon} />
+        <Text style={styles.btnText}>Choose Photo</Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity style={styles.btn} onPress={takePicture}>
-              <Text style={styles.btnText}>Take Picture</Text>
-            </TouchableOpacity>
-          </View>
+      <TouchableOpacity style={styles.btn} onPress={takePicture}>
+        <Ionicons name="camera" size={24} color="white" style={styles.icon} />
+        <Text style={styles.btnText}>Take Picture</Text>
+      </TouchableOpacity>
+    </View>
 
-          {loading && <ActivityIndicator size="large" color="#03DAC6" />}
+          {loading && <ActivityIndicator size="large" color="#333" />}
 
           {removedBgImageUri && (
             <>
@@ -179,10 +254,26 @@ const PhotoUploadForm = () => {
                   horizontal
                 />
               </View>
-
-              <TouchableOpacity style={styles.btn} onPress={captureAndDownloadImage}>
-                <Text style={styles.btnText}>Capture and Download Image</Text>
+                  {!Status && (
+                     <TouchableOpacity 
+              style={styles.btn2} 
+              onPress={()=>setVisible(true)}
+              
+              >
+                <Text style={styles.btnText2}>Pay Now</Text>
               </TouchableOpacity>
+                  )}
+             
+             {Status &&(
+              <TouchableOpacity 
+              style={styles.btn2} 
+              onPress={captureAndDownloadImage}
+              
+              >
+                
+                <Text style={styles.btnText2}>Download Image</Text>
+              </TouchableOpacity>
+              )}
             </>
           )}
         </View>
@@ -197,7 +288,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'aliceblue',
+    backgroundColor: 'white',
   },
   formContainer: {
     backgroundColor: 'white',
@@ -232,25 +323,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     resizeMode: 'cover',
   },
-  btn: {
-    backgroundColor: '#03DAC6',
+  
+  btn2: {
+    backgroundColor: '#222',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 20,
+    marginBottom: 30,
+    width : '100%'
   },
-  btnText: {
+  btnText2: {
     color: 'aliceblue',
     fontSize: 16,
+    textAlign : 'center',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
+  
   backgroundIconContainer: {
     flexDirection: 'row',
     justifyContent: 'center', // Center horizontally
-    marginTop: 20,
+    
+    padding : 15,
   },
   backgroundIcon: {
     width: 50,
@@ -259,6 +350,30 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     overflow: 'hidden',
   },
+buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Adjusts spacing between buttons
+    margin: 10,
+  },
+  btn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#222',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1, 
+    marginHorizontal: 5, 
+   
+  },
+  btnText: {
+    color: 'white',
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  icon: {
+    marginTop: -2,
+  },
+  
 });
 
 export default PhotoUploadForm;

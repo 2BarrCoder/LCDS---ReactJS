@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator,ImageBackground } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-
+import {fetchGalleries} from '../screens/session_utils';
 const GaleriesDePhotos: React.FC = () => {
   const [galeries, setGaleries] = useState([
 
@@ -14,20 +14,21 @@ const GaleriesDePhotos: React.FC = () => {
     React.useCallback(() => {
       let isActive = true;
 
-      fetch('http://192.168.0.102/CasaDeselfi/CasaDeselfi/backend/getGalerie.php')
-        .then((response) => response.json())
-        .then((data) => {
+      const loadGalleries = async () => {
+        try {
+          const data = await fetchGalleries();
           if (isActive) {
             setGaleries(data);
             setLoading(false);
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           if (isActive) {
-            console.error('Error fetching galleries:', error);
             setLoading(false);
           }
-        });
+        }
+      };
+
+      loadGalleries();
 
       // Cleanup function to avoid setting state on unmounted component
       return () => {

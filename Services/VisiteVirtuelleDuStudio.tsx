@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Dimensions, ImageBackground, Text, Image, ScrollView } from 'react-native';
 import { WebView } from 'react-native-webview';
-
+import PhotoUploadForm from './PriseDePhotosADistance';
 const VisiteVirtuelle = () => {
   const { width } = Dimensions.get('window');
   const [isWebViewFocused, setIsWebViewFocused] = useState(false);
@@ -23,6 +23,9 @@ const VisiteVirtuelle = () => {
         </ImageBackground>  
         
         <View style={styles.infoCard}>
+          <Text style={styles.infoTextHeader}>
+            Title
+           </Text>
           <Image
             source={require('../assets/y13.jpg')}
             style={styles.infoImage}
@@ -36,13 +39,34 @@ const VisiteVirtuelle = () => {
         <View style={{ height: 400, width: '110%' }}>
           <WebView
             source={{ uri: 'https://2barrcoder.github.io/360ImgView/' }} 
-            style={{ width: '100%', height: 400 }}
+            style={{ width: '100%', height: '40%' }}
             onScroll={() => setIsWebViewFocused(true)}  // Detect when scrolling starts in the WebView
             onTouchStart={() => setIsWebViewFocused(true)}  // Enable WebView scroll focus
             onTouchEnd={() => setIsWebViewFocused(false)}  // Release WebView scroll focus
             scrollEnabled={true}  // Enable WebView scrolling
           />
         </View>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTextHeader}>
+            Title
+           </Text>
+          <Image
+            source={require('../assets/y13.jpg')}
+            style={styles.infoImage}
+          />
+          <Text style={styles.infoText}>
+            Welcome to La Casa De Selfie! Schedule your appointment to capture stunning pictures in our professional studio. Whether you're celebrating a special occasion, creating content, or just looking for a fun experience, our studio is equipped with the perfect lighting, backdrops, and equipment to make your photoshoot a memorable one.
+          </Text>
+        </View>
+        <View style={{marginRight:10}}>
+                <PhotoUploadForm >
+
+                </PhotoUploadForm>
+        </View>
+          
+
+       
+        
         
       </ScrollView>
     </View>
@@ -92,7 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     marginBottom: 20,
-    width: '90%', // Adjust width for better responsiveness
+    width: '110%', // Adjust width for better responsiveness
     maxWidth: 400,
     alignItems: 'center',
     elevation: 3,
@@ -107,10 +131,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
   },
+  
   infoText: {
     fontSize: 16,
     color: '#555',
     textAlign: 'center',
+  },
+   infoTextHeader: {
+    fontSize: 26,
+    fontWeight:'bold',
+    color: '#000',
+    textAlign: 'left',
+    left:'-40%',
+    paddingBottom:15,
   },
 });
 

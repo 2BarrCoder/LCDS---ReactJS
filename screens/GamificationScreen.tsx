@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   header: {
     display: 'flex',
     position: 'static',
-    top: '-1%',
+    top: '-2%',
     left: '-7%',
     width: '110%',
     padding : 10,
